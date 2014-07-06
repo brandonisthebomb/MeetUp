@@ -1,0 +1,51 @@
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/main_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/LightGrey">
+
+        <EditText
+            android:id="@+id/main_edittext"
+            android:padding="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/custom_edittext"
+            android:layout_above="@+id/button"
+            android:hint="Message"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            />
+
+
+        <tjhs.meet.meetupversion10.meetupversion10.UI.CircleButton
+            android:layout_width="100dp"
+            android:layout_height="60dp"
+            android:id="@+id/button"
+            android:src="@drawable/ic_action_tick"
+            app:cb_color="#99CC00"
+            app:cb_pressed_ring_width="8dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:onClick="saveFunction"/>
+
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/left_drawer"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:layout_below="@+id/top_bar"
+        android:background="@android:color/darker_gray"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/background_dark"
+        android:dividerHeight="1dp" />
+
+
+</android.support.v4.widget.DrawerLayout>
