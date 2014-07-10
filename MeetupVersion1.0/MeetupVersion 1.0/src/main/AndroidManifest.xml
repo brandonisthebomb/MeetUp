@@ -17,6 +17,15 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".ContactActivity"
+            android:label="Choose people to add"
+            android:parentActivityName=".MainActivity">
+
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable_contacts" />
+
+        </activity>
+
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

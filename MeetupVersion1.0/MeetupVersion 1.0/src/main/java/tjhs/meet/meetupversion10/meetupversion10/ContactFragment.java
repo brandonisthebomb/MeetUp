@@ -1,4 +1,4 @@
-package tjhs.meet.meetupversion10.meetupversion10.UI;
+package tjhs.meet.meetupversion10.meetupversion10;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.LoaderManager;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
@@ -17,6 +18,9 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
@@ -30,8 +34,8 @@ import tjhs.meet.meetupversion10.meetupversion10.R;
 /**
  * Created by Brandon on 7/5/14.
  */
-public class ContactsFragment extends DialogFragment implements
-    LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnItemClickListener, SearchView.OnQueryTextListener {
+public class ContactFragment extends DialogFragment implements
+    LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnItemClickListener {
 
     private static final String[] PROJECTION = {ContactsContract.Contacts._ID,
             ContactsContract.Contacts.LOOKUP_KEY, ContactsContract.Contacts.DISPLAY_NAME_PRIMARY};
@@ -51,18 +55,24 @@ public class ContactsFragment extends DialogFragment implements
     SearchView mSearchView;
     private String[] mSelectionArgs = {mSearchString};
 
+    private static final String STATE_PREVIOUSLY_SELECTED_KEY = "tjhs.meet.meetupversion10.meetupversion10.SELECTED_ITEM";
+
+    @Override
+    public void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the list fragment layout
         View view =  inflater.inflate(R.layout.contact_list_fragment, container, false);
         mContactsList = (ListView)view.findViewById(R.id.list);
-        mCursorAdapter = new SimpleCursorAdapter(getActivity(), R.layout.contacts_list_item, null,
+        mCursorAdapter = new SimpleCursorAdapter(getActivity(), R.layout.contact_list_item, null,
                 FROM_COLUMNS, TO_IDS, 0);
         mContactsList.setAdapter(mCursorAdapter);
         mContactsList.setOnItemClickListener(this);
         getLoaderManager().initLoader(0, null, this);
-        mSearchView = (SearchView)view.findViewById(R.id.mySearchView);
-        mSearchView.setOnQueryTextListener(this);
 
         return view;
     }
@@ -112,21 +122,54 @@ public class ContactsFragment extends DialogFragment implements
         }
     }
 
-    public boolean onQueryTextChange(String newText){
-        String newSearchString = !TextUtils.isEmpty(newText) ? newText : null;
-        if (mSearchString == null && newSearchString == null){
-            return true;
-        }
-        if (mSearchString == null && mSearchString.equals(newSearchString)){
-            return true;
-        }
-        mSearchString = newSearchString;
-        getLoaderManager().restartLoader(0, null, this);
-        return true;
+    public void setSearchQuery(String query){
+        mSearchString = query;
     }
 
     @Override
-    public boolean onQueryTextSubmit(String query) {
-        return false;
+    public void onCreateOptionsMenu (Menu menu, MenuInflater inflater){
+
+        inflater.inflate(R.menu.contact_list_menu, menu);
+        MenuItem searchItem = menu.findItem(R.id.menu_search);
+        final SearchManager searchManager = (SearchManager)getActivity().getSystemService(Context.SEARCH_SERVICE);
+        final SearchView searchView = (SearchView)searchItem.getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                String newSearchString = !TextUtils.isEmpty(newText) ? newText : null;
+                if (mSearchString == null && newSearchString == null){
+                    return true;
+                }
+                if (mSearchString != null && mSearchString.equals(newSearchString)){
+                    return true;
+                }
+                mSearchString = newSearchString;
+                getLoaderManager().restartLoader(0, null, ContactFragment.this);
+                return true;
+            }
+        });
+
+        if(mSearchString != null){
+            final String savedSearchString = mSearchString;
+            searchView.setQuery(savedSearchString, false);
+        }
+
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState){
+        super.onSaveInstanceState(outState);
+        if(!TextUtils.isEmpty(mSearchString)){
+            outState.putString(SearchManager.QUERY, mSearchString);
+     //       outState.putInt(STATE_PREVIOUSLY_SELECTED_KEY, getListView().getChecked );
+
+        }
+    }
+
 }

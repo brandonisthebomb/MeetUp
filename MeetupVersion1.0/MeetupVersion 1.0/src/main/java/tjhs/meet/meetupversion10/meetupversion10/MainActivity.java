@@ -187,7 +187,7 @@ public class MainActivity extends FragmentActivity{
     private class whoSphereOnClickListener implements View.OnClickListener{
         @Override
         public void onClick(View view){
-            Intent intent = new Intent(MainActivity.this, ContactsActivity.class);
+            Intent intent = new Intent(MainActivity.this, ContactActivity.class);
             startActivity(intent);
         }
     }
