@@ -3,6 +3,7 @@ package tjhs.meet.meetupversion10.meetupversion10;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentTransaction;
+import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -30,11 +31,9 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import tjhs.meet.meetupversion10.meetupversion10.UI.Sphere;
-import tjhs.meet.meetupversion10.meetupversion10.UI.whoDialogFragment;
 
-public class MainActivity extends FragmentActivity implements whoDialogFragment.NoticeDialogListener{
+public class MainActivity extends FragmentActivity{
 
     final String tag = "MainActivity";
     private ActionBar myActionBar;
@@ -93,23 +92,12 @@ public class MainActivity extends FragmentActivity implements whoDialogFragment.
         mLayout.addView(dummyView);
 
         setupUI(mLayout);
-    }
 
-    public void showWhoDialog(){
-        whoDialogFragment dialog = new whoDialogFragment();
-        dialog.show(getFragmentManager(), "Who");
+        Intent intent = getIntent();
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())){
+            String query = intent.getStringExtra(SearchManager.QUERY);
+        }
     }
-
-    @Override
-    public void onWhoDialogPositiveClick(whoDialogFragment dialog) {
-        return;
-    }
-
-    @Override
-    public void onWhoDialogNegativeClick(whoDialogFragment dialog) {
-        dialog.dismiss();
-    }
-
 
     public void saveFunction(View view){
 
@@ -199,7 +187,8 @@ public class MainActivity extends FragmentActivity implements whoDialogFragment.
     private class whoSphereOnClickListener implements View.OnClickListener{
         @Override
         public void onClick(View view){
-            showWhoDialog();
+            Intent intent = new Intent(MainActivity.this, ContactsActivity.class);
+            startActivity(intent);
         }
     }
 
