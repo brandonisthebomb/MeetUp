@@ -7,7 +7,8 @@
     <ListView android:id="@id/android:list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        android:choiceMode="multipleChoice"/>
 
     <TextView android:id="@id/android:empty"
         android:gravity="top|center"
@@ -17,6 +18,5 @@
         android:fontFamily="sans-serif-light"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:paddingTop="10dp"/>
-
 
 </FrameLayout>

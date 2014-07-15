@@ -36,16 +36,20 @@ import tjhs.meet.meetupversion10.meetupversion10.UI.Sphere;
 public class MainActivity extends FragmentActivity{
 
     final String tag = "MainActivity";
+
     private ActionBar myActionBar;
+
     private DrawerLayout mDrawerLayout;
+
     private ListView mDrawerList;
+
     private String[] mDrawerListItems;
+
     private ActionBarDrawerToggle mActionBarDrawerToggle;
+
     private RelativeLayout mLayout;
 
     private TextView dummyView;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +83,12 @@ public class MainActivity extends FragmentActivity{
         mLayout = (RelativeLayout)findViewById(R.id.main_layout);
 
         init();
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        myActionBar.setDisplayShowHomeEnabled(true);
     }
 
     private void init(){

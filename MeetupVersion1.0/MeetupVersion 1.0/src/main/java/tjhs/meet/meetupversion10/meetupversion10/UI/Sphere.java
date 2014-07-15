@@ -20,18 +20,24 @@ public class Sphere extends View {
     private String mText;
 
     private float mRadius;
+
     private float centerX;
+
     private float centerY;
+
     private RelativeLayout.LayoutParams mParams;
 
     private int mColor;
+
     private Paint mPaint;
+
     private Canvas mCanvas;
 
     private String[] who;
-    private int time;
-    private Location location;
 
+    private int time;
+
+    private Location location;
 
     public Sphere(Context context) {
         super(context);

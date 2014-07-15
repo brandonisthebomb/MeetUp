@@ -39,6 +39,7 @@ import android.widget.QuickContactBadge;
 import android.widget.SearchView;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -52,16 +53,13 @@ public class ContactFragment extends ListFragment implements
 
     private static final String STATE_PREVIOUSLY_SELECTED_KEY = "tjhs.meet.meetupversion10.meetupversion10.SELECTEDITEM";
 
-    private ContactsAdapter mAdapter; // The main query adapter
-    private String mSearchTerm; // Stores the current search query term
+    private ContactsAdapter mAdapter;
+
+    private String mSearchTerm;
 
     private OnContactsInteractionListener mOnContactSelectedListener;
 
     private int mPreviouslySelectedSearchItem = 0;
-
-    private boolean mSearchQueryChanged;
-
-    private boolean mIsTwoPaneLayout;
 
     private boolean mIsSearchResultView = false;
 
@@ -104,9 +102,6 @@ public class ContactFragment extends ListFragment implements
 
         setListAdapter(mAdapter);
         getListView().setOnItemClickListener(this);
-        if (mIsTwoPaneLayout) {
-            getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        }
 
         if (mPreviouslySelectedSearchItem == 0) {
             getLoaderManager().initLoader(ContactsQuery.QUERY_ID, null, this);
@@ -134,9 +129,6 @@ public class ContactFragment extends ListFragment implements
                 cursor.getLong(ContactsQuery.ID),
                 cursor.getString(ContactsQuery.LOOKUP_KEY));
         mOnContactSelectedListener.onContactSelected(uri);
-        if (mIsTwoPaneLayout) {
-            getListView().setItemChecked(position, true);
-        }
     }
 
     private void onSelectionCleared() {
@@ -174,9 +166,7 @@ public class ContactFragment extends ListFragment implements
                     return true;
                 }
                 mSearchTerm = newFilter;
-                mSearchQueryChanged = true;
-                getLoaderManager().restartLoader(
-                        ContactsQuery.QUERY_ID, null, ContactFragment.this);
+                getLoaderManager().restartLoader(ContactsQuery.QUERY_ID, null, ContactFragment.this);
                 return true;
             }
         });
@@ -293,31 +283,6 @@ public class ContactFragment extends ListFragment implements
         // This swaps the new cursor into the adapter.
         if (loader.getId() == ContactsQuery.QUERY_ID) {
             mAdapter.swapCursor(data);
-
-            // If this is a two-pane layout and there is a search query then
-            // there is some additional work to do around default selected
-            // search item.
-            if (mIsTwoPaneLayout && !TextUtils.isEmpty(mSearchTerm) && mSearchQueryChanged) {
-                // Selects the first item in results, unless this fragment has
-                // been restored from a saved state (like orientation change)
-                // in which case it selects the previously selected search item.
-                if (data != null && data.moveToPosition(mPreviouslySelectedSearchItem)) {
-                    // Creates the content Uri for the previously selected contact by appending the
-                    // contact's ID to the Contacts table content Uri
-                    final Uri uri = Uri.withAppendedPath(
-                            Contacts.CONTENT_URI, String.valueOf(data.getLong(ContactsQuery.ID)));
-                    mOnContactSelectedListener.onContactSelected(uri);
-                    getListView().setItemChecked(mPreviouslySelectedSearchItem, true);
-                } else {
-                    // No results, clear selection.
-                    onSelectionCleared();
-                }
-                // Only restore from saved state one time. Next time fall back
-                // to selecting first item. If the fragment state is saved again
-                // then the currently selected item will once again be saved.
-                mPreviouslySelectedSearchItem = 0;
-                mSearchQueryChanged = false;
-            }
         }
     }
 
@@ -328,30 +293,6 @@ public class ContactFragment extends ListFragment implements
             // cursor resources to be freed.
             mAdapter.swapCursor(null);
         }
-    }
-
-    /**
-     * Gets the preferred height for each item in the ListView, in pixels, after accounting for
-     * screen density. ImageLoader uses this value to resize thumbnail images to match the ListView
-     * item height.
-     *
-     * @return The preferred height in pixels, based on the current theme.
-     */
-    private int getListPreferredItemHeight() {
-        final TypedValue typedValue = new TypedValue();
-
-        // Resolve list item preferred height theme attribute into typedValue
-        getActivity().getTheme().resolveAttribute(
-                android.R.attr.listPreferredItemHeight, typedValue, true);
-
-        // Create a new DisplayMetrics object
-        final DisplayMetrics metrics = new android.util.DisplayMetrics();
-
-        // Populate the DisplayMetrics
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
-        // Return theme value based on DisplayMetrics
-        return (int) typedValue.getDimension(metrics);
     }
 
     /**
@@ -439,13 +380,8 @@ public class ContactFragment extends ListFragment implements
          */
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            // Gets handles to individual view resources
-            final ViewHolder holder = (ViewHolder) view.getTag();
 
-            // For Android 3.0 and later, gets the thumbnail image Uri from the current Cursor row.
-            // For platforms earlier than 3.0, this isn't necessary, because the thumbnail is
-            // generated from the other fields in the row.
-            final String photoUri = cursor.getString(ContactsQuery.PHOTO_THUMBNAIL_DATA);
+            final ViewHolder holder = (ViewHolder) view.getTag();
 
             final String displayName = cursor.getString(ContactsQuery.DISPLAY_NAME);
 
