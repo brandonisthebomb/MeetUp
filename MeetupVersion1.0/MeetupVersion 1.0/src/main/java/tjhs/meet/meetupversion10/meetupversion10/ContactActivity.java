@@ -42,7 +42,6 @@ public class ContactActivity extends FragmentActivity implements ContactFragment
     public void onContactSelected(Uri contactUri) {
 
 
-
     }
 
     @Override

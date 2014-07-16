@@ -31,7 +31,6 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import tjhs.meet.meetupversion10.meetupversion10.UI.Sphere;
 
 public class MainActivity extends FragmentActivity{
 
@@ -92,21 +91,12 @@ public class MainActivity extends FragmentActivity{
     }
 
     private void init(){
-        Sphere whoSphere = new Sphere(this, 150, 150, 70, getResources().getColor(R.color.colorPrimary),null);
-        whoSphere.setText("Who");
-        whoSphere.setOnClickListener(new whoSphereOnClickListener());
-        mLayout.addView(whoSphere, whoSphere.getParams());
-
         dummyView = new TextView(this);
         dummyView.setLayoutParams(new RelativeLayout.LayoutParams(0,0));
         mLayout.addView(dummyView);
 
         setupUI(mLayout);
 
-        Intent intent = getIntent();
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())){
-            String query = intent.getStringExtra(SearchManager.QUERY);
-        }
     }
 
     public void saveFunction(View view){
@@ -192,14 +182,5 @@ public class MainActivity extends FragmentActivity{
         inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
     }
 
-
-
-    private class whoSphereOnClickListener implements View.OnClickListener{
-        @Override
-        public void onClick(View view){
-            Intent intent = new Intent(MainActivity.this, ContactActivity.class);
-            startActivity(intent);
-        }
-    }
 
 }
