@@ -8,22 +8,22 @@
         revision="20.0.0"
         sha1="9d9013e9ff35fc3756411e62873c363c70c638fa"/>
     <item
-        dex="/Users/Brandon/Desktop/Development/Meet_Up/MeetupVersion1.0/MeetupVersion 1.0/build/intermediates/pre-dexed/debug/classes-2c855678ff21032986955251f56abebc6aad74fb.jar"
-        jar="/Users/Brandon/Desktop/Development/Meet_Up/MeetupVersion1.0/build/intermediates/exploded-aar/com.android.support/appcompat-v7/20.0.0/classes.jar"
+        dex="/Users/Brandon/Desktop/Development/Meet_Up/MeetupVersion1.0/MeetupVersion 1.0/build/intermediates/pre-dexed/debug/internal_impl-20.0.0-7f84a91907f2cebcc32630796695568e2009fb43.jar"
+        jar="/Users/Brandon/Desktop/Development/Meet_Up/MeetupVersion1.0/MeetupVersion 1.0/build/intermediates/exploded-aar/com.android.support/support-v4/20.0.0/libs/internal_impl-20.0.0.jar"
         jumboMode="false"
         revision="20.0.0"
-        sha1="f21927d22fe31889ecce94dd697a2e75b137e0ef"/>
+        sha1="e40b3078e3fbd353c9f44da8df25a8fc0078209d"/>
     <item
-        dex="/Users/Brandon/Desktop/Development/Meet_Up/MeetupVersion1.0/MeetupVersion 1.0/build/intermediates/pre-dexed/debug/classes-8a978278fdacfb93db7a786854799feaf8586cf7.jar"
-        jar="/Users/Brandon/Desktop/Development/Meet_Up/MeetupVersion1.0/build/intermediates/exploded-aar/com.android.support/support-v4/20.0.0/classes.jar"
+        dex="/Users/Brandon/Desktop/Development/Meet_Up/MeetupVersion1.0/MeetupVersion 1.0/build/intermediates/pre-dexed/debug/classes-dcd3fb2a71dcfd105920f6571564e956c81c2fd1.jar"
+        jar="/Users/Brandon/Desktop/Development/Meet_Up/MeetupVersion1.0/MeetupVersion 1.0/build/intermediates/exploded-aar/com.android.support/support-v4/20.0.0/classes.jar"
         jumboMode="false"
         revision="20.0.0"
         sha1="8694693636ab36910c8100ce527c258ff3ebece0"/>
     <item
-        dex="/Users/Brandon/Desktop/Development/Meet_Up/MeetupVersion1.0/MeetupVersion 1.0/build/intermediates/pre-dexed/debug/internal_impl-20.0.0-759a4752c802017b4ae4019b33ec92bf8ac349b4.jar"
-        jar="/Users/Brandon/Desktop/Development/Meet_Up/MeetupVersion1.0/build/intermediates/exploded-aar/com.android.support/support-v4/20.0.0/libs/internal_impl-20.0.0.jar"
+        dex="/Users/Brandon/Desktop/Development/Meet_Up/MeetupVersion1.0/MeetupVersion 1.0/build/intermediates/pre-dexed/debug/classes-465b482f4eff04cb4180176b809e648f11721995.jar"
+        jar="/Users/Brandon/Desktop/Development/Meet_Up/MeetupVersion1.0/MeetupVersion 1.0/build/intermediates/exploded-aar/com.android.support/appcompat-v7/20.0.0/classes.jar"
         jumboMode="false"
         revision="20.0.0"
-        sha1="e40b3078e3fbd353c9f44da8df25a8fc0078209d"/>
+        sha1="f21927d22fe31889ecce94dd697a2e75b137e0ef"/>
 
 </pre-dex-items>

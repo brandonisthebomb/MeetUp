@@ -10,6 +10,24 @@
         android:layout_height="match_parent"
         android:background="@color/LightGrey">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="5dp">
+
+            <GridView
+                android:layout_width="match_parent"
+                android:layout_height= "@dimen/grid_size"
+                android:id="@+id/who_gridview"
+                android:columnWidth="@dimen/grid_size"
+                android:numColumns="auto_fit"
+                android:horizontalSpacing="10dp"
+                android:layout_alignParentEnd="true"
+                android:scrollbars="horizontal"/>
+
+        </LinearLayout>
+
+
         <tjhs.meet.meetupversion10.meetupversion10.UI.CircleButton
             android:id="@+id/button"
             android:layout_width="100dp"

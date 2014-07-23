@@ -4,10 +4,12 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.app.SearchManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -18,15 +20,20 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.text.Layout;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
@@ -50,6 +57,11 @@ public class MainActivity extends FragmentActivity{
 
     private TextView dummyView;
 
+    private GridView myWhoGridView;
+
+    private String[] GroupPreferences;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -58,6 +70,7 @@ public class MainActivity extends FragmentActivity{
 
         //Set up the Actionbar and the drawerlist for menus
         myActionBar = getActionBar();
+        myActionBar.hide();
 
         mDrawerListItems = getResources().getStringArray(R.array.nav_drawer_items);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -71,8 +84,6 @@ public class MainActivity extends FragmentActivity{
                 R.string.drawer_close);
 
         mDrawerLayout.setDrawerListener(mActionBarDrawerToggle);
-        myActionBar.setDisplayHomeAsUpEnabled(true);
-        myActionBar.setHomeButtonEnabled(true);
 
         // Set the adapter for the list view
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mDrawerListItems));
@@ -81,23 +92,46 @@ public class MainActivity extends FragmentActivity{
 
         mLayout = (RelativeLayout)findViewById(R.id.main_layout);
 
-        init();
-    }
+        myWhoGridView = (GridView)findViewById(R.id.who_gridview);
 
-    @Override
-    public void onResume(){
-        super.onResume();
-        myActionBar.setDisplayShowHomeEnabled(true);
-    }
+        int mLength = 1;
+        if (savedInstanceState != null){
+            mLength = savedInstanceState.getInt("num_contacts");
+        }
 
-    private void init(){
+        GroupPreferences = new String[mLength];
+        myWhoGridView.setAdapter(new GroupAdapter(this, GroupPreferences));
+        myWhoGridView.setOnItemClickListener(new GridItemListener());
+
         dummyView = new TextView(this);
         dummyView.setLayoutParams(new RelativeLayout.LayoutParams(0,0));
         mLayout.addView(dummyView);
 
         setupUI(mLayout);
+    }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
 
     }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        myActionBar.setDisplayShowHomeEnabled(true);
+    }
+    
+    @Override
+    protected void onRestart(){
+        super.onRestart();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outstate){
+        super.onSaveInstanceState(outstate);
+    }
+
 
     public void saveFunction(View view){
 
@@ -180,6 +214,57 @@ public class MainActivity extends FragmentActivity{
     public static void hideSoftKeyboard(Activity activity) {
         InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+    }
+
+    private class GroupAdapter extends BaseAdapter{
+
+        private LayoutInflater mInflater;
+
+        private String[] mContactsArray;
+
+        public GroupAdapter(Context context, String[] array){
+            mInflater = LayoutInflater.from(context);
+            mContactsArray = array;
+        }
+
+        public int getCount(){
+            int count = mContactsArray.length;
+            if(count == 0){
+                return 1;
+            }
+            return count;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return mContactsArray[position];
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            convertView = mInflater.inflate(R.layout.group_list_item, parent, false);
+            if(position == 0){
+                convertView = mInflater.inflate(R.layout.group_add_item, parent, false);
+            }
+
+            return convertView;
+
+        }
+    }
+
+    private class GridItemListener implements GridView.OnItemClickListener{
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            if(position == 0){
+                Intent intent = new Intent(MainActivity.this, ContactActivity.class);
+                startActivity(intent);
+            }
+        }
     }
 
 
