@@ -37,7 +37,7 @@
             app:cb_pressed_ring_width="8dp"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:onClick="saveFunction"/>
+            android:onClick="send"/>
 
         <EditText
             android:id="@+id/main_edittext"

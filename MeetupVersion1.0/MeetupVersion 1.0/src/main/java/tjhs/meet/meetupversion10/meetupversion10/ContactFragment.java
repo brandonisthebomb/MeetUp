@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LauncherActivity;
 import android.app.SearchManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
@@ -13,12 +14,14 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Contacts.Photo;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.util.SimpleArrayMap;
 import android.support.v4.widget.CursorAdapter;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -46,6 +49,7 @@ import android.widget.Toast;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class ContactFragment extends ListFragment implements
@@ -61,11 +65,13 @@ public class ContactFragment extends ListFragment implements
 
     private OnContactsInteractionListener mOnContactSelectedListener;
 
+    private DataPasser mDataPasser;
+
     private int mPreviouslySelectedSearchItem = 0;
 
     private boolean mIsSearchResultView = false;
 
-    private Uri[] mContactsArray;
+    public static ArrayList<String> PhoneNumbers = new ArrayList<String>();
 
     public ContactFragment() {}
 
@@ -88,8 +94,7 @@ public class ContactFragment extends ListFragment implements
 
         if (savedInstanceState != null) {
             mSearchTerm = savedInstanceState.getString(SearchManager.QUERY);
-            mPreviouslySelectedSearchItem =
-                    savedInstanceState.getInt(STATE_PREVIOUSLY_SELECTED_KEY, 0);
+            mPreviouslySelectedSearchItem = savedInstanceState.getInt(STATE_PREVIOUSLY_SELECTED_KEY, 0);
         }
 
     }
@@ -121,18 +126,53 @@ public class ContactFragment extends ListFragment implements
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement OnContactsInteractionListener");
         }
+        try {
+            mDataPasser = (DataPasser)activity;
+        }catch (ClassCastException e){
+            throw new ClassCastException(activity.toString()+ "must implement DataPasser");
+        }
     }
 
     @Override
-    public void onStop(){
+    public void onPause(){
+        super.onPause();
+
+        final Cursor cursor = mAdapter.getCursor();
+
+        final ContentResolver mContentResolver = getActivity().getContentResolver();
+
+
         SparseBooleanArray checked = getListView().getCheckedItemPositions();
+        for(int i = 0; i < getListView().getAdapter().getCount(); i++){
 
-        super.onStop();
+            if (checked.get(i)){
+
+                cursor.moveToPosition(i);
+                final String contact_id = cursor.getString(cursor.getColumnIndex(ContactsQuery.CONTACTS_ID));
+
+                if (Integer.parseInt(cursor.getString(ContactsQuery.HAS_PHONE_NUMBER)) > 0) {
+                    Cursor phoneCursor = mContentResolver.query(PhoneQuery.PHONE_URI, PhoneQuery.PROJECTION, PhoneQuery.PHONE_ID + " = ?", new String[]{contact_id}, null);
+
+                    while(phoneCursor.moveToNext()) {
+                        String phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(PhoneQuery.NUMBER));
+                        int type = phoneCursor.getInt(phoneCursor.getColumnIndex(PhoneQuery.TYPE));
+                        switch (type){
+                            case ContactsContract.CommonDataKinds.Phone.TYPE_HOME:
+                                break;
+                            case ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE:
+                                //Log.w(phoneNumber,phoneNumber);
+                                PhoneNumbers.add(phoneNumber);
+                                break;
+                            case ContactsContract.CommonDataKinds.Phone.TYPE_WORK:
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+        passData(PhoneNumbers);
     }
 
-    public Uri[] getContactsArray(){
-        return mContactsArray;
-    }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
@@ -144,12 +184,22 @@ public class ContactFragment extends ListFragment implements
                 cursor.getLong(ContactsQuery.ID),
                 cursor.getString(ContactsQuery.LOOKUP_KEY));
 
-        mOnContactSelectedListener.onContactSelected(uri);
+        if(getListView().isItemChecked(position)){
+            mOnContactSelectedListener.onContactUnselected(uri);
+        }
+        else {
+            mOnContactSelectedListener.onContactSelected(uri);
+        }
+
     }
 
     private void onSelectionCleared() {
         mOnContactSelectedListener.onSelectionCleared();
         getListView().clearChoices();
+    }
+
+    private void passData(ArrayList<String> data){
+        mDataPasser.onDataPass(data);
     }
 
     @Override
@@ -202,8 +252,7 @@ public class ContactFragment extends ListFragment implements
                     onSelectionCleared();
                 }
                 mSearchTerm = null;
-                getLoaderManager().restartLoader(
-                        ContactsQuery.QUERY_ID, null, ContactFragment.this);
+                getLoaderManager().restartLoader(ContactsQuery.QUERY_ID, null, ContactFragment.this);
                 return true;
             }
         });
@@ -340,8 +389,7 @@ public class ContactFragment extends ListFragment implements
             } else {
                 final SpannableString highlightedName = new SpannableString(displayName);
 
-                highlightedName.setSpan(highlightTextSpan, startIndex,
-                        startIndex + mSearchTerm.length(), 0);
+                highlightedName.setSpan(highlightTextSpan, startIndex, startIndex + mSearchTerm.length(), 0);
 
                 holder.text1.setText(highlightedName);
 
@@ -395,6 +443,7 @@ public class ContactFragment extends ListFragment implements
     public interface OnContactsInteractionListener {
 
         public void onContactSelected(Uri contactUri);
+        public void onContactUnselected(Uri contactUri);
         public void onSelectionCleared();
     }
 
@@ -405,6 +454,8 @@ public class ContactFragment extends ListFragment implements
         final static Uri CONTENT_URI = Contacts.CONTENT_URI;
 
         final static Uri FILTER_URI = Contacts.CONTENT_FILTER_URI;
+
+        final static String CONTACTS_ID = Contacts._ID;
 
         @SuppressLint("InlinedApi")
         final static String SELECTION = (Contacts.DISPLAY_NAME_PRIMARY) + "<>''" + " AND " + Contacts.IN_VISIBLE_GROUP + "=1";
@@ -420,7 +471,7 @@ public class ContactFragment extends ListFragment implements
 
                 Contacts.DISPLAY_NAME_PRIMARY,
 
-                Contacts.PHOTO_THUMBNAIL_URI,
+                Contacts.HAS_PHONE_NUMBER,
 
                 SORT_ORDER,
         };
@@ -428,6 +479,27 @@ public class ContactFragment extends ListFragment implements
         final static int ID = 0;
         final static int LOOKUP_KEY = 1;
         final static int DISPLAY_NAME = 2;
+        final static int HAS_PHONE_NUMBER = 3;
         final static int SORT_KEY = 4;
+    }
+
+    public interface PhoneQuery {
+
+        final static Uri PHONE_URI = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+
+        final static String PHONE_ID = ContactsContract.CommonDataKinds.Phone.CONTACT_ID;
+
+        final static int PHONE_MOBILE = ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE;
+
+        final static String TYPE = ContactsContract.CommonDataKinds.Phone.TYPE;
+
+        final static String NUMBER = ContactsContract.CommonDataKinds.Phone.NUMBER;
+
+        final static String[] PROJECTION = {NUMBER, TYPE};
+    }
+
+    public interface DataPasser{
+        public void onDataPass(ArrayList<String> data);
+
     }
 }

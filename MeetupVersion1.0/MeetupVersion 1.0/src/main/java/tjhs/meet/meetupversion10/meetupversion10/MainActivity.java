@@ -3,6 +3,7 @@ package tjhs.meet.meetupversion10.meetupversion10;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentTransaction;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,6 +21,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.telephony.SmsManager;
 import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,6 +40,9 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
 
 public class MainActivity extends FragmentActivity{
 
@@ -59,7 +64,11 @@ public class MainActivity extends FragmentActivity{
 
     private GridView myWhoGridView;
 
+    private EditText mEditText;
+
     private String[] GroupPreferences;
+
+    private ArrayList<String> mContactNumbers;
 
 
     @Override
@@ -95,54 +104,73 @@ public class MainActivity extends FragmentActivity{
         myWhoGridView = (GridView)findViewById(R.id.who_gridview);
 
         int mLength = 1;
-        if (savedInstanceState != null){
-            mLength = savedInstanceState.getInt("num_contacts");
-        }
+//        if (savedInstanceState != null){
+//            mLength = savedInstanceState.getInt("num_contacts");
+//            mContactNumbers = savedInstanceState.getStringArrayList("mContactsPhoneArray");
+//        }
+//        else{
+//            mContactNumbers = new ArrayList<String>();
+//        }
+        mContactNumbers = new ArrayList<String>();
 
+
+        //Create who grid
         GroupPreferences = new String[mLength];
         myWhoGridView.setAdapter(new GroupAdapter(this, GroupPreferences));
         myWhoGridView.setOnItemClickListener(new GridItemListener());
 
+        //Associate Edit text
+        mEditText = (EditText)findViewById(R.id.main_edittext);
+
+        //Set up UI------------------------------------------------------
         dummyView = new TextView(this);
         dummyView.setLayoutParams(new RelativeLayout.LayoutParams(0,0));
         mLayout.addView(dummyView);
-
         setupUI(mLayout);
+        //-----------------------------------------------------------------
+        Log.w("MainActivity", "onCreate");
     }
 
-    @Override
-    protected void onStart(){
-        super.onStart();
-
-    }
-
-    @Override
-    protected void onResume(){
-        super.onResume();
-        myActionBar.setDisplayShowHomeEnabled(true);
-    }
-    
-    @Override
-    protected void onRestart(){
-        super.onRestart();
-    }
 
     @Override
     protected void onSaveInstanceState(Bundle outstate){
         super.onSaveInstanceState(outstate);
+        outstate.putStringArrayList("mContactsPhoneArray", mContactNumbers);
+        Log.w("MainActivity", "onSaveInstanceState");
+
     }
 
 
-    public void saveFunction(View view){
+    public void send(View view){
+        if (mContactNumbers.isEmpty()) {
+            Toast.makeText(this, "No Contacts selected", Toast.LENGTH_SHORT).show();
+        } else {
 
+            // get the message from the message text box
+            String msg = mEditText.getText().toString();
+
+            for (int i = 0; i < mContactNumbers.size(); i++) {
+                String phoneNumber = mContactNumbers.get(i);
+                Toast.makeText(this, phoneNumber, Toast.LENGTH_SHORT).show();
+                // call the sms manager
+                PendingIntent pi = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
+                SmsManager sms = SmsManager.getDefault();
+                // this is the function that does all the magic
+                sms.sendTextMessage(phoneNumber, null, msg, pi, null);
+            }
+        }
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        Log.w("onActivityResult", "gets here");
+        if (requestCode == 1){
+            if (resultCode == RESULT_OK){
+                Log.w("onActivityResult", "gets here");
+                mContactNumbers = data.getStringArrayListExtra("PhoneNumbers");
+            }
+        }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -262,7 +290,8 @@ public class MainActivity extends FragmentActivity{
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if(position == 0){
                 Intent intent = new Intent(MainActivity.this, ContactActivity.class);
-                startActivity(intent);
+                intent.setAction(Intent.ACTION_PICK);
+                startActivityForResult(intent, 1);
             }
         }
     }
